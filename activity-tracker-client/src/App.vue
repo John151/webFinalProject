@@ -1,10 +1,14 @@
 <template>
   <div id="app">
 
-      <AddRecords v-on:record-added="newRecordAdded"></AddRecords>
+      <AddRecords v-on:record-added="newRecordAdded"
+      v-bind:isEditingRecord="isEditingRecord"
+      v-bind:recordToEdit="recordToEdit"
+      v-on:edit-record-submit="editRecordSubmit"
+      ></AddRecords>
       <RecordsTable v-bind:records="records"
         v-on:delete-record="deleteRecord"
-        v-on:edit-record="editRecord"></RecordsTable>
+        v-on:edit-record="editRecordRequest"></RecordsTable>
         <ArtChart v-bind:chartData="chartData"/>
         <LineChart v-bind:chartData="chart2Data"/>
   </div>
@@ -42,7 +46,9 @@ export default {
                     digital: 0,
                     traditional: 0
                 }
-            }
+            },
+            isEditingRecord: false,
+            recordToEdit: {}
         }
     },
     methods: {
@@ -59,23 +65,32 @@ export default {
                 this.updateRecords()
             })
         },
-        editRecord(record) { //the idea here is to repopulate the form with the information
+        editRecordRequest(record) { //the idea here is to repopulate the form with the information
             //in our record, then delete the record. some of the elements weren't working
             //i'm investigating why still
-            let date = record.date.substr(0, 10)
-            document.getElementById("date").value = date
-            document.getElementById("hours").value = record.hours
-            document.getElementById("type").value = record.type
-            //document.getElementById("medium").value = record.medium
-            document.getElementById("comp").checked = record.completed
+            
+            this.isEditingRecord = true 
+            this.recordToEdit = record 
             alert("Values of entry have been transferred for form, please make changes and re-submit")
-            this.deleteRecord(record)
+          
         },
+        editRecordSubmit(newRecord) {
+
+            console.log('The updated record data is ', newRecord)
+  
+            // create this function, call it, reset the form back to adding record state
+           // this.$record_api.editRecord(newRecord).then( () => {
+                this.isEditingRecord = false 
+                this.recordToEdit = {} 
+            //}) 
+        },
+
         updateRecords() {
             this.$record_api.getAllRecords().then(records => {
                 this.records = records
+                this.updateChartData()
             })
-            this.updateChartData()
+            
         },
         updateChartData() {
             this.typeDataDict.type.painting = 0
