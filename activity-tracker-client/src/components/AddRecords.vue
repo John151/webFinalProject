@@ -4,9 +4,13 @@
 
       <h1 class="text-center">{{activity}} Time Tracker</h1>
 
-      <div id="add-hours" class="card">
+    <!-- some type of style to indicate to the user they are editing, not adding a new record -->
+      <div id="add-hours" class="card" v-bind:class="{ edit: isEditingRecord }">
 
-          <h2 class="card-header">Add Records</h2>
+          <h2 v-if="isEditingRecord" class="card-header edit">Edit Record</h2>
+          <h2 v-else class="card-header">Add Records</h2>
+
+
           <div class="card-body">
 
               <div class="alert alert-danger" v-show="errors.length > 0">
@@ -62,7 +66,8 @@
               </div>
 
               <div>
-                  <button class="btn btn-primary mt-2" type="button" v-on:click="submit">Add record</button>
+                  <button v-if="isEditingRecord" class="btn btn-secondary mt-2" type="button" v-on:click="submitEdit">Edit record</button>
+                  <button v-else class="btn btn-primary mt-2" type="button" v-on:click="submitAdd">Add record</button>
               </div>
 
           </div>
@@ -75,6 +80,10 @@
 export default {
     //create component here
     name: 'AddRecords',
+    props: {
+        recordToEdit: Object,
+        isEditingRecord: Boolean  // as opposed to adding new data
+    },
     data() {
         return {
             uniqueKey: Number,
@@ -99,8 +108,30 @@ export default {
             return text.toLowerCase()
         }
     },
+    watch: {
+        isEditingRecord() {  // this function runs id the editing prop changes 
+            if (this.isEditingRecord) {
+                this.errors = []
+                this.hours = this.recordToEdit.hours
+                this.dateString = this.recordToEdit.dateString  // todo fix this one to actually show dat
+                this.type = this.recordToEdit.type 
+                this.medium = this.recordToEdit.medium
+                this.completed = this.recordToEdit.completed
+                this.notes = this.recordToEdit.notes
+            } else {
+                // not editing, clear form (?) or whatever action would be suitable for the not-editing state
+                this.errors = []
+                this.hours = 1
+                this.dateString = ''
+                this.type = ''
+                this.medium = ''
+                this.completed = false
+                this.notes = ''
+            }
+        }
+    },
     methods: {
-        submit() {
+        submitAdd() {
             this.errors = []
 
             //let date = new Date(this.dateString)
@@ -135,6 +166,20 @@ export default {
                     //this emits message to parent with new record
                 this.$emit('record-added', record)
             }
+        },
+        submitEdit() {
+
+            //todo validate
+            let record = {
+                // todo include date, uniqueKey
+                hours: this.hours,
+                type: this.type,
+                medium: this.medium,
+                completed: this.completed,
+                notes: this.notes
+            }
+
+            this.$emit('edit-record-submit', record)
         }
     },
 
@@ -157,5 +202,9 @@ li {
 }
 a {
   color: #42b983;
+}
+
+.edit {
+    background-color: violet;  /* or some other style/visual feedback so user can differentiate between edit and add */
 }
 </style>

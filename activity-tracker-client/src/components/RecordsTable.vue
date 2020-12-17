@@ -24,7 +24,7 @@
                         </tr>
 
                         <record-row
-                            v-for="record in records" v-bind:key="record.uniqueKey"
+                            v-for="record in records" v-bind:key="record.id"
                             v-bind:record="record"
                             v-bind:edit="editTable"
                             v-on:delete-record="deleteRecord"

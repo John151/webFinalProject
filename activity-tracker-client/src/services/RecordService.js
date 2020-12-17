@@ -19,5 +19,8 @@ export default {
         return axios.delete(`${base_url}/${id}`).then(response => {
             return response.data
         })
-    }
+    },
+
+    // todo edit record function 
+
 }
